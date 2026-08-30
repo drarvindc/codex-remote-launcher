@@ -12,6 +12,8 @@ Administrator privileges.
 This relies on undocumented and internal Codex behavior. Future Codex updates
 may break it. It is not supported, endorsed, or affiliated with OpenAI.
 
+![Codex Remote Launcher hero banner showing Codex Desktop Windows remote control](docs/images/chatgpt_codex_remote_connection_windows_hero.png)
+
 ## Working on Windows
 
 Tested successfully with Codex Desktop `26.825.6671.0` on Windows.
