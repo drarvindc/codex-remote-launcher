@@ -1,0 +1,25 @@
+# Local runtime output
+logs/
+state/*.json
+state/*.tmp
+!state/launcher-settings.example.json
+*.log
+
+# Build output/intermediates
+bin/
+obj/
+build-output/
+*.exe
+release/
+
+# Local history/checkpoints and experimental artifacts
+archive/
+dev-history/
+
+# Machine-specific and local integration files
+*.local.*
+*.user
+*.suo
+*.lnk
+
+# Keep the required runtime bridge source under runtime/src tracked.

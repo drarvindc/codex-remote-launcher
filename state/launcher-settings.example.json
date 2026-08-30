@@ -1,0 +1,4 @@
+{
+  "codexExecutable": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_<version>_x64__<package-family>\\app\\ChatGPT.exe",
+  "nodeExecutable": "%LOCALAPPDATA%\\OpenAI\\Codex\\runtimes\\cua_node\\<runtime-id>\\bin\\node.exe"
+}
