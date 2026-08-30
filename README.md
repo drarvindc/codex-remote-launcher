@@ -12,6 +12,24 @@ Administrator privileges.
 This relies on undocumented and internal Codex behavior. Future Codex updates
 may break it. It is not supported, endorsed, or affiliated with OpenAI.
 
+## Working on Windows
+
+Tested successfully with Codex Desktop `26.825.6671.0` on Windows.
+
+### Control other devices enabled
+
+![Codex Desktop Windows Settings showing Control other devices enabled](docs/images/chatgpt_codex_remote_connection_windows_settings.png)
+
+`Control other devices` is visible under `Settings → Connections`, with a
+remote Windows device connected.
+
+### Remote project connected and usable
+
+![Remote Codex project connected and usable in Codex Desktop](docs/images/chatgpt_codex_remote_connection_windows.png)
+
+The remote project is available directly inside Codex Desktop and can be used
+interactively from the controlling Windows PC.
+
 ## Why this exists
 
 Earlier work showed that Codex’s remote-control functionality can work on
@@ -29,9 +47,8 @@ kill or take over the existing process.
 - A per-user bundled Node runtime supplied by the Codex installation.
 - A signed-in Codex account and any account/workspace authorization required by
   Codex remote control.
-- The initial confirmed validation used Codex Desktop `26.825.5331.0` on
-  Windows. The current development workstation has since reported package
-  `26.825.6671.0`; compatibility must be checked after every Codex update.
+- The final confirmed validation used Codex Desktop `26.825.6671.0` on
+  Windows; compatibility must be checked after every Codex update.
 - No Administrator privileges are required in the tested configuration.
 
 Do not infer broad Windows or Codex-version compatibility from these results.
