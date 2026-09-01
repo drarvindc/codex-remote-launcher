@@ -119,6 +119,26 @@ The launcher deliberately uses Codex’s per-user bundled Node runtime rather
 than trying to execute a protected Node binary inside WindowsApps. Confirm the
 configured per-user runtime exists and rerun `--verify-only`.
 
+### Access denied launching Codex (`System.ComponentModel.Win32Exception: Access is denied` at `Process.Start`)
+
+This is a different failure than the one above: it happens on the Special
+launch step itself, not the Node step. `logs\launcher-crash.log` will show the
+exception originating in `Process.Start`/`StartWithCreateProcess`, and
+`logs\launcher.log` will show a `SpecialLaunchStarted` line with no matching
+`SpecialLaunchConfirmed` line after it.
+
+Store-signed MSIX packages (Codex Desktop installed from the Microsoft Store
+is one) block a plain `CreateProcess` call against the inner `ChatGPT.exe`
+from an arbitrary parent process, even when `icacls` shows the launching user
+has execute rights on the file. This reproduces independent of any launcher
+arguments — a bare `Start-Process` with no debug flags and a correct working
+directory fails identically. The launcher must activate the package via
+`IApplicationActivationManager::ActivateApplication` (AppX/COM activation)
+instead of `Process.Start`; that API also accepts the debug-launch arguments
+via its `arguments` parameter. Confirm the fix by launching the same package
+through `shell:AppsFolder\<PackageFamilyName>!App` in PowerShell — if that
+succeeds while direct `Process.Start` fails, this is the cause.
+
 ### Codex launches but Control other devices is missing
 
 Inspect the logs for `SpecialLaunch`, `SpecialLaunchConfirmed`, `Orchestrator`,
