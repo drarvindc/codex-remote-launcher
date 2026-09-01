@@ -62,6 +62,15 @@ Do not infer broad Windows or Codex-version compatibility from these results.
 3. Open `Settings → Connections`.
 4. Enable or use `Control other devices`.
 
+The first time you run it, it also tries to set itself up: it copies `runtime/`
+and the example settings file into its working folder if they're missing, and
+tries to find your Codex install and Node runtime on its own. If it can only
+find one of each, it writes `state\launcher-settings.json` for you and you
+don't have to touch anything. If it finds none or more than one of either, it
+won't guess - copy `state\launcher-settings.example.json` to
+`state\launcher-settings.json` yourself and fill in the two paths (see
+"Development and build" below for where to find them).
+
 If Codex is already running, the launcher exits safely and displays:
 
 `Close Codex first, then run Codex Remote.`
@@ -174,7 +183,15 @@ The checked-in `state\launcher-settings.example.json` documents the two local
 paths required by the current launcher. A local installation must provide
 `state\launcher-settings.json` for its installed Codex package and bundled
 Node runtime; that machine-specific file is deliberately not included in the
-release bundle.
+release bundle. The launcher tries to fill this in for you automatically on
+first run (see Usage above); the manual steps below are only needed if that
+didn't work, e.g. more than one Codex install was found.
+
+To find the two paths yourself: for `codexExecutable`, run
+`Get-AppxPackage OpenAI.Codex` in PowerShell and look at `InstallLocation`,
+then append `\app\ChatGPT.exe`. For `nodeExecutable`, look under
+`%LOCALAPPDATA%\OpenAI\Codex\runtimes\cua_node\` - there's normally one
+subfolder in there, and the file you want is `bin\node.exe` inside it.
 
 ## Credits and acknowledgements
 
