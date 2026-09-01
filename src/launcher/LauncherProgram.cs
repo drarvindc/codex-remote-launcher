@@ -19,6 +19,8 @@ internal static class LauncherProgram
         TaskScheduler.UnobservedTaskException += (s, e) => { logger.WriteCrash("UnobservedTaskException", e.Exception, "unobserved-task"); e.SetObserved(); };
         try
         {
+            FirstRunSetup.EnsureScaffold(root, logger);
+            FirstRunSetup.TryAutoWriteSettings(root, logger);
             CodexProcessDetector detector = new CodexProcessDetector();
             var roots = detector.Find(null, null);
             if (!verifyOnly && roots.Count != 0) { string message = "Close Codex first, then run Codex Remote."; logger.Write("Guard", message + " roots=" + roots.Count); ShowMessage(message, "Codex Remote"); return 2; }
