@@ -16,7 +16,7 @@ may break it. It is not supported, endorsed, or affiliated with OpenAI.
 
 ## Working on Windows
 
-Tested successfully with Codex Desktop `26.825.6671.0` on Windows.
+Tested successfully with Codex Desktop `26.831.2377.0` on Windows.
 
 ### Control other devices enabled
 
@@ -57,25 +57,32 @@ Do not infer broad Windows or Codex-version compatibility from these results.
 
 ## Usage
 
-1. Close Codex completely.
-2. Run `CodexRemoteLauncher.exe`, or the `Codex Remote` desktop shortcut.
-3. Open `Settings → Connections`.
-4. Enable or use `Control other devices`.
+Normal setup:
 
-The first time you run it, it also tries to set itself up: it copies `runtime/`
-and the example settings file into its working folder if they're missing, and
-tries to find your Codex install and Node runtime on its own. If it can only
-find one of each, it writes `state\launcher-settings.json` for you and you
-don't have to touch anything. If it finds none or more than one of either, it
-won't guess - copy `state\launcher-settings.example.json` to
-`state\launcher-settings.json` yourself and fill in the two paths (see
-"Development and build" below for where to find them).
+1. Download the release ZIP.
+2. Extract it to a normal writable folder.
+3. Close Codex completely.
+4. Run `CodexRemoteLauncher.exe` (or the `Codex Remote` shortcut).
+5. On first run, the launcher prepares its runtime/state files, detects the
+   installed Codex package and bundled `cua_node` runtime, and creates its
+   launcher settings automatically.
+6. Codex starts with remote-control support enabled.
+7. Open `Settings -> Connections -> Control other devices`.
 
 If Codex is already running, the launcher exits safely and displays:
 
 `Close Codex first, then run Codex Remote.`
 
 The launcher performs no automatic retry.
+
+### After a Codex update
+
+Store updates can change the WindowsApps package path. If a saved Codex or
+Node path no longer exists, the launcher automatically searches again. It
+refreshes the stale setting when exactly one valid replacement is found. If it
+finds zero or multiple candidates, it refuses to guess and explains the issue
+in the logs. Manual JSON configuration is only a fallback for unusual or
+ambiguous installations.
 
 ## Architecture
 
@@ -164,6 +171,16 @@ Runtime logs are kept under `logs\`:
 Logs are rotated at approximately 1 MiB with one `.1` file retained. Logs and
 local state are intentionally excluded from the distributable release bundle.
 
+## Manual configuration fallback
+
+Manual configuration is normally unnecessary. Use it only when automatic
+detection is unavailable or ambiguous. To find the Codex path, run
+`Get-AppxPackage OpenAI.Codex` in PowerShell and append `\app\ChatGPT.exe` to
+the reported `InstallLocation`. Find the bundled Node runtime under
+`%LOCALAPPDATA%\OpenAI\Codex\runtimes\cua_node\`; the executable is
+`bin\node.exe` inside the selected runtime folder. Preserve any existing
+settings keys when updating the JSON.
+
 ## Development and build
 
 The release executable is built from the launcher sources in `src\launcher`.
@@ -180,18 +197,8 @@ Use `CodexRemoteLauncher.exe --verify-only` to run package compatibility
 verification without launching Codex.
 
 The checked-in `state\launcher-settings.example.json` documents the two local
-paths required by the current launcher. A local installation must provide
-`state\launcher-settings.json` for its installed Codex package and bundled
-Node runtime; that machine-specific file is deliberately not included in the
-release bundle. The launcher tries to fill this in for you automatically on
-first run (see Usage above); the manual steps below are only needed if that
-didn't work, e.g. more than one Codex install was found.
-
-To find the two paths yourself: for `codexExecutable`, run
-`Get-AppxPackage OpenAI.Codex` in PowerShell and look at `InstallLocation`,
-then append `\app\ChatGPT.exe`. For `nodeExecutable`, look under
-`%LOCALAPPDATA%\OpenAI\Codex\runtimes\cua_node\` - there's normally one
-subfolder in there, and the file you want is `bin\node.exe` inside it.
+paths used by the launcher. The machine-specific `launcher-settings.json` is
+created or refreshed automatically and is not included in the release bundle.
 
 ## Credits and acknowledgements
 
@@ -204,6 +211,8 @@ techniques were informed by:
   credited as original research/reference. No explicit license notice was
   identified on that gist, so this project does not treat its text as licensed
   reusable code.
+- AppX/MSIX activation support and the initial first-run auto-configuration
+  work were contributed by PatrickSys in PR #2.
 
 The standalone implementation uses ideas and techniques derived from that
 work, but replaces the lifecycle/takeover architecture with a minimal direct-
