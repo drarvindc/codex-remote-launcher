@@ -16,8 +16,11 @@ internal sealed class CodexLauncher
     internal Process StartSpecial(string executablePath, int rendererPort, int mainPort)
     {
         string arguments = "--remote-debugging-address=127.0.0.1 --remote-debugging-port=" + rendererPort + " --inspect=127.0.0.1:" + mainPort;
-        logger.Write("SpecialLaunch", "exe=" + executablePath + " args=" + arguments);
-        return Process.Start(new ProcessStartInfo { FileName = executablePath, Arguments = arguments, WorkingDirectory = Path.GetDirectoryName(executablePath), UseShellExecute = false, CreateNoWindow = false });
+        string packageFullName = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(executablePath)));
+        string appUserModelId = AppxActivation.FamilyNameFromPackageFullName(packageFullName) + "!App";
+        logger.Write("SpecialLaunch", "exe=" + executablePath + " aumid=" + appUserModelId + " args=" + arguments);
+        uint pid = AppxActivation.Activate(appUserModelId, arguments);
+        return Process.GetProcessById((int)pid);
     }
     internal bool PortsOpen(int rendererPort, int mainPort, int timeoutMs)
     {
