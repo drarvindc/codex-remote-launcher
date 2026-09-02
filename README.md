@@ -62,6 +62,15 @@ Do not infer broad Windows or Codex-version compatibility from these results.
 3. Open `Settings → Connections`.
 4. Enable or use `Control other devices`.
 
+The first time you run it, it also tries to set itself up: it copies `runtime/`
+and the example settings file into its working folder if they're missing, and
+tries to find your Codex install and Node runtime on its own. If it can only
+find one of each, it writes `state\launcher-settings.json` for you and you
+don't have to touch anything. If it finds none or more than one of either, it
+won't guess - copy `state\launcher-settings.example.json` to
+`state\launcher-settings.json` yourself and fill in the two paths (see
+"Development and build" below for where to find them).
+
 If Codex is already running, the launcher exits safely and displays:
 
 `Close Codex first, then run Codex Remote.`
@@ -119,6 +128,26 @@ The launcher deliberately uses Codex’s per-user bundled Node runtime rather
 than trying to execute a protected Node binary inside WindowsApps. Confirm the
 configured per-user runtime exists and rerun `--verify-only`.
 
+### Access denied launching Codex (`System.ComponentModel.Win32Exception: Access is denied` at `Process.Start`)
+
+This is a different failure than the one above: it happens on the Special
+launch step itself, not the Node step. `logs\launcher-crash.log` will show the
+exception originating in `Process.Start`/`StartWithCreateProcess`, and
+`logs\launcher.log` will show a `SpecialLaunchStarted` line with no matching
+`SpecialLaunchConfirmed` line after it.
+
+Store-signed MSIX packages (Codex Desktop installed from the Microsoft Store
+is one) block a plain `CreateProcess` call against the inner `ChatGPT.exe`
+from an arbitrary parent process, even when `icacls` shows the launching user
+has execute rights on the file. This reproduces independent of any launcher
+arguments — a bare `Start-Process` with no debug flags and a correct working
+directory fails identically. The launcher must activate the package via
+`IApplicationActivationManager::ActivateApplication` (AppX/COM activation)
+instead of `Process.Start`; that API also accepts the debug-launch arguments
+via its `arguments` parameter. Confirm the fix by launching the same package
+through `shell:AppsFolder\<PackageFamilyName>!App` in PowerShell — if that
+succeeds while direct `Process.Start` fails, this is the cause.
+
 ### Codex launches but Control other devices is missing
 
 Inspect the logs for `SpecialLaunch`, `SpecialLaunchConfirmed`, `Orchestrator`,
@@ -154,7 +183,15 @@ The checked-in `state\launcher-settings.example.json` documents the two local
 paths required by the current launcher. A local installation must provide
 `state\launcher-settings.json` for its installed Codex package and bundled
 Node runtime; that machine-specific file is deliberately not included in the
-release bundle.
+release bundle. The launcher tries to fill this in for you automatically on
+first run (see Usage above); the manual steps below are only needed if that
+didn't work, e.g. more than one Codex install was found.
+
+To find the two paths yourself: for `codexExecutable`, run
+`Get-AppxPackage OpenAI.Codex` in PowerShell and look at `InstallLocation`,
+then append `\app\ChatGPT.exe`. For `nodeExecutable`, look under
+`%LOCALAPPDATA%\OpenAI\Codex\runtimes\cua_node\` - there's normally one
+subfolder in there, and the file you want is `bin\node.exe` inside it.
 
 ## Credits and acknowledgements
 
