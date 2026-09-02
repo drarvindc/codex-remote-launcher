@@ -20,12 +20,13 @@ internal static class LauncherProgram
         try
         {
             FirstRunSetup.EnsureScaffold(root, logger);
-            FirstRunSetup.TryAutoWriteSettings(root, logger);
+            FirstRunSetup.EnsureSettings(root, logger);
             CodexProcessDetector detector = new CodexProcessDetector();
             var roots = detector.Find(null, null);
             if (!verifyOnly && roots.Count != 0) { string message = "Close Codex first, then run Codex Remote."; logger.Write("Guard", message + " roots=" + roots.Count); ShowMessage(message, "Codex Remote"); return 2; }
             string executable = ReadSetting(root, "codexExecutable"); string node = ReadSetting(root, "nodeExecutable");
-            if (!File.Exists(executable)) throw new FileNotFoundException("Codex executable not found", executable);
+            if (!File.Exists(executable)) throw new FileNotFoundException("Codex executable not found: " + executable, executable);
+            if (!File.Exists(node)) throw new FileNotFoundException("Node executable not found: " + node, node);
             string failure; if (!new PackageChecker(root, logger).Verify(executable, node, out failure)) throw new InvalidOperationException("package verification failed: " + failure);
             if (verifyOnly) { logger.Write("VerifyOnly", "package compatibility verified"); Console.WriteLine("Compatible"); return 0; }
             var launcher = new CodexLauncher(logger); int renderer = launcher.ReservePort(); int main = launcher.ReservePort(); logger.Write("SpecialLaunchStarted", "renderer=" + renderer + " main=" + main);

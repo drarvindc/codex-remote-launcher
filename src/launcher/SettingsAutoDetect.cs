@@ -5,7 +5,7 @@ using Microsoft.Win32;
 
 internal static class SettingsAutoDetect
 {
-    internal static bool TryFindCodexExecutable(out string path, out string detail)
+    internal static bool TryFindCodexExecutable(SimpleLogger logger, out string path, out string detail)
     {
         var candidates = new List<string>();
 
@@ -30,7 +30,7 @@ internal static class SettingsAutoDetect
                 }
             }
         }
-        catch { }
+        catch (Exception ex) { logger.Write("AutoDetect", "registry discovery failed: " + ex.GetType().Name + ": " + ex.Message); }
 
         try
         {
@@ -44,17 +44,12 @@ internal static class SettingsAutoDetect
                 }
             }
         }
-        catch { }
+        catch (Exception ex) { logger.Write("AutoDetect", "WindowsApps fallback failed: " + ex.GetType().Name + ": " + ex.Message); }
 
-        if (candidates.Count == 1) { path = candidates[0]; detail = null; return true; }
-        path = null;
-        detail = candidates.Count == 0
-            ? "no OpenAI.Codex package found (checked the AppX registry and WindowsApps)"
-            : "found " + candidates.Count + " candidate Codex installs, refusing to guess: " + string.Join(", ", candidates.ToArray());
-        return false;
+        return SelectSingleCandidate(candidates, "Codex", out path, out detail);
     }
 
-    internal static bool TryFindNodeExecutable(out string path, out string detail)
+    internal static bool TryFindNodeExecutable(SimpleLogger logger, out string path, out string detail)
     {
         var candidates = new List<string>();
 
@@ -72,13 +67,18 @@ internal static class SettingsAutoDetect
                 }
             }
         }
-        catch { }
+        catch (Exception ex) { logger.Write("AutoDetect", "Node runtime discovery failed: " + ex.GetType().Name + ": " + ex.Message); }
 
-        if (candidates.Count == 1) { path = candidates[0]; detail = null; return true; }
+        return SelectSingleCandidate(candidates, "Node", out path, out detail);
+    }
+
+    internal static bool SelectSingleCandidate(IList<string> candidates, string label, out string path, out string detail)
+    {
+        var unique = new List<string>();
+        foreach (string candidate in candidates) if (!unique.Contains(candidate)) unique.Add(candidate);
+        if (unique.Count == 1) { path = unique[0]; detail = null; return true; }
         path = null;
-        detail = candidates.Count == 0
-            ? "no cua_node runtime with bin\\node.exe found under %LOCALAPPDATA%\\OpenAI\\Codex\\runtimes\\cua_node"
-            : "found " + candidates.Count + " candidate Node runtimes, refusing to guess: " + string.Join(", ", candidates.ToArray());
+        detail = unique.Count == 0 ? "no " + label + " candidate found" : "found " + unique.Count + " candidate " + label + " installs, refusing to guess: " + string.Join(", ", unique.ToArray());
         return false;
     }
 }
