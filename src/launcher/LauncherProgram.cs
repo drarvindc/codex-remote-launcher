@@ -37,7 +37,11 @@ internal static class LauncherProgram
             if (!launcher.PortsOpen(renderer, main, 10000, out rendererReady, out mainReady))
             {
                 logger.Write("DebugPortStatus", "renderer=" + (rendererReady ? "ready" : "not-listening") + " main=" + (mainReady ? "ready" : "not-listening"));
-                throw new InvalidOperationException(CodexLauncher.DescribePortFailure(rendererReady, mainReady));
+                if (!rendererReady || mainReady) throw new InvalidOperationException(CodexLauncher.DescribePortFailure(rendererReady, mainReady));
+                logger.Write("BootstrapStrategy", "RendererOnly");
+                string rendererFailure; if (!new OrchestratorRunner(root, logger).RunRenderer(node, renderer, out rendererFailure)) throw new InvalidOperationException("renderer-only orchestrator failed: " + (rendererFailure ?? "bridge proof failed"));
+                logger.Write("Active", "renderer-only bridge proof accepted pid=" + special.Id + " renderer=" + renderer);
+                Console.WriteLine("Active"); return 0;
             }
             string orchestratorFailure; if (!new OrchestratorRunner(root, logger).Run(node, renderer, main, out orchestratorFailure)) throw new InvalidOperationException("orchestrator failed: " + (orchestratorFailure ?? "bridge proof failed"));
             logger.Write("Active", "bridge proof accepted pid=" + special.Id + " renderer=" + renderer + " main=" + main);

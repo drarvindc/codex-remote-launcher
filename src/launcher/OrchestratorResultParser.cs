@@ -29,18 +29,21 @@ internal static class OrchestratorResultParser
             if (!root.TryGetValue("protocolVersion", out protocolValue) || Convert.ToInt32(protocolValue) != 1)
                 return Fail("required-status-invalid", "protocolVersion");
 
-            Dictionary<string, object> main;
             Dictionary<string, object> renderer;
-            if (!TryObject(root, "main", out main)) return Fail("required-proof-missing", "main");
+            Dictionary<string, object> main = null;
             if (!TryObject(root, "renderer", out renderer)) return Fail("required-proof-missing", "renderer");
+            TryObject(root, "main", out main);
 
-            Dictionary<string, object> closure;
-            if (!TryObject(main, "inspectorPortClosed", out closure)) return Fail("required-proof-missing", "main.inspectorPortClosed");
-            bool confirmed;
-            string closureCode;
-            if (!TryBool(closure, "confirmed", out confirmed) || !TryString(closure, "code", out closureCode)
-                || !confirmed || closureCode != "ECONNREFUSED")
-                return Fail("bridge-proof-not-proven", "main.inspectorPortClosed");
+            if (main != null)
+            {
+                Dictionary<string, object> closure;
+                if (!TryObject(main, "inspectorPortClosed", out closure)) return Fail("required-proof-missing", "main.inspectorPortClosed");
+                bool confirmed;
+                string closureCode;
+                if (!TryBool(closure, "confirmed", out confirmed) || !TryString(closure, "code", out closureCode)
+                    || !confirmed || closureCode != "ECONNREFUSED")
+                    return Fail("bridge-proof-not-proven", "main.inspectorPortClosed");
+            }
 
             Dictionary<string, object> probe;
             if (!TryObject(renderer, "probe", out probe)) return Fail("required-proof-missing", "renderer.probe");

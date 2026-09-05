@@ -64,6 +64,28 @@ will fail closed when that incompatibility is detected. This does not establish
 that every later Codex version is incompatible; future builds may change the
 behavior.
 
+### Compatibility matrix
+
+| Codex About version | MSIX/package version | Launcher version | Status |
+| --- | --- | --- | --- |
+| Not recorded | 26.825.6671.0 | v0.1.0 | Supported / tested |
+| Not recorded | 26.825.6671.0 | v0.2.0 | Supported / tested |
+| 26.831.21537 | 26.831.2377.0 | v0.2.0 | Supported / tested |
+| 26.901.41123 | 26.901.5003.0 | v0.2.0 | Incompatible |
+| 26.901.41123 | 26.901.5003.0 | v0.3.0 | Supported / tested |
+
+The version shown in Codex About may differ from the Windows Store/MSIX package
+version. This project records both when known. Compatibility is based on tested
+combinations, not assumed version ranges.
+
+Issue #3 originally reported MSIX `26.901.2854.0` with the same main-process
+inspector failure. This does not establish that every 26.901 build is
+universally incompatible.
+
+Codex Remote Launcher aims to support the latest stable Windows Codex Desktop
+build. New Codex releases may temporarily break compatibility because the
+launcher depends on undocumented internal behavior.
+
 ## Usage
 
 Normal setup:
@@ -171,8 +193,9 @@ and `Active`. Also confirm that the package check succeeded. Do not take
 ownership of WindowsApps or change its ACLs.
 
 If the renderer debug endpoint opens but the main-process inspector does not,
-the current Codex build may have disabled Electron's `--inspect` support. The
-launcher reports this separately from a general debug-port failure.
+the launcher selects its renderer-only bootstrap when the existing renderer
+bridge can prove activation. Older builds continue to use the full main-
+inspector path.
 
 ## Logging
 
