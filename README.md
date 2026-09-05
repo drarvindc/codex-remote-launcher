@@ -66,13 +66,14 @@ behavior.
 
 ### Compatibility matrix
 
-| Codex About version | MSIX/package version | Launcher version | Status |
-| --- | --- | --- | --- |
-| Not recorded | 26.825.6671.0 | v0.1.0 | Supported / tested |
-| Not recorded | 26.825.6671.0 | v0.2.0 | Supported / tested |
-| 26.831.21537 | 26.831.2377.0 | v0.2.0 | Supported / tested |
-| 26.901.41123 | 26.901.5003.0 | v0.2.0 | Incompatible |
-| 26.901.41123 | 26.901.5003.0 | v0.3.0 | Supported / tested |
+| Codex About | Released | MSIX/package | Launcher | Status |
+| --- | --- | --- | --- | --- |
+| Not recorded | Not recorded | 26.825.6671.0 | v0.1.0 | Supported / tested |
+| Not recorded | Not recorded | 26.825.6671.0 | v0.2.0 | Supported / tested |
+| 26.831.21537 | 2 Sept 2026 | 26.831.2377.0 | v0.2.0 | Supported / tested |
+| 26.901.41123 | 5 Sept 2026 | 26.901.5003.0 | v0.2.0 | Incompatible / tested |
+| 26.901.41123 | 5 Sept 2026 | 26.901.5003.0 | v0.3.0 | Supported / tested |
+| 26.901.41600 | 5 Sept 2026 | 26.901.5280.0 | v0.3.0 | Supported / tested |
 
 The version shown in Codex About may differ from the Windows Store/MSIX package
 version. This project records both when known. Compatibility is based on tested
