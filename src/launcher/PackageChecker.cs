@@ -29,6 +29,14 @@ internal sealed class PackageChecker
                 logger.Write("PackageVerified", "exit=" + process.ExitCode + " outputLength=" + stdout.Length + " errorLength=" + stderr.Length);
                 if (process.ExitCode != 0) { failure = "package-check-exit=" + process.ExitCode; return false; }
                 if (stdout.IndexOf("\"classification\":\"CandidateCompatible\"", StringComparison.Ordinal) < 0) { failure = "package-incompatible"; return false; }
+                if (stdout.IndexOf("\"classification\":\"IncompatibleMainInspectorDisabled\"", StringComparison.Ordinal) >= 0)
+                {
+                    logger.Write("CompatibilityBlocked", "reason=main-process-inspector-disabled");
+                    failure = "main-process-inspector-disabled";
+                    return false;
+                }
+                if (stdout.IndexOf("\"classification\":\"Unknown\"", StringComparison.Ordinal) >= 0)
+                    logger.Write("CompatibilityInspectorUnknown", "main-process-inspector=fuse-state-unknown");
                 failure = null; return true;
             }
         }

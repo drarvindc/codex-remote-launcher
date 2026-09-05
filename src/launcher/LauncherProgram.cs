@@ -33,7 +33,12 @@ internal static class LauncherProgram
             var special = launcher.StartSpecial(executable, renderer, main);
             if (special == null || special.HasExited) throw new InvalidOperationException("special process exited immediately");
             logger.Write("SpecialLaunchConfirmed", "pid=" + special.Id + " renderer=" + renderer + " main=" + main);
-            if (!launcher.PortsOpen(renderer, main, 10000)) throw new InvalidOperationException("debug ports were not confirmed");
+            bool rendererReady; bool mainReady;
+            if (!launcher.PortsOpen(renderer, main, 10000, out rendererReady, out mainReady))
+            {
+                logger.Write("DebugPortStatus", "renderer=" + (rendererReady ? "ready" : "not-listening") + " main=" + (mainReady ? "ready" : "not-listening"));
+                throw new InvalidOperationException(CodexLauncher.DescribePortFailure(rendererReady, mainReady));
+            }
             string orchestratorFailure; if (!new OrchestratorRunner(root, logger).Run(node, renderer, main, out orchestratorFailure)) throw new InvalidOperationException("orchestrator failed: " + (orchestratorFailure ?? "bridge proof failed"));
             logger.Write("Active", "bridge proof accepted pid=" + special.Id + " renderer=" + renderer + " main=" + main);
             Console.WriteLine("Active"); return 0;

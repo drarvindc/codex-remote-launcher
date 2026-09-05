@@ -13,6 +13,28 @@ const signatures = new Map([
   ["windowsControllerUi", Buffer.from("Control other devices from this PC")],
 ]);
 
+const FUSE_SENTINEL = Buffer.from("dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX");
+
+export function inspectFuseWire(buffer) {
+  const candidates = [];
+  let offset = buffer.indexOf(FUSE_SENTINEL);
+  while (offset !== -1) {
+    const header = offset + FUSE_SENTINEL.length;
+    const version = buffer[header];
+    const length = buffer[header + 1];
+    const wire = buffer.subarray(header + 2, header + 2 + (length || 0));
+    if (version === 1 && length >= 4 && wire.length === length && [...wire].every((value) => value === 0x30 || value === 0x31 || value === 0x72)) {
+      const nodeCliInspect = wire[3] === 0x30 ? "disabled" : wire[3] === 0x31 ? "enabled" : "unknown";
+      const nodeOptions = wire[2] === 0x30 ? "disabled" : wire[2] === 0x31 ? "enabled" : "unknown";
+      candidates.push({ version, length, nodeCliInspect, nodeOptions });
+    }
+    offset = buffer.indexOf(FUSE_SENTINEL, offset + 1);
+  }
+  if (candidates.length !== 1) return { classification: "Unknown", candidates: candidates.length };
+  const result = candidates[0];
+  return { ...result, classification: result.nodeCliInspect === "disabled" ? "IncompatibleMainInspectorDisabled" : result.nodeCliInspect === "enabled" ? "Compatible" : "Unknown" };
+}
+
 function createProductionAdapters() {
   return {
     access,
@@ -23,6 +45,17 @@ function createProductionAdapters() {
     readdir,
     resolvePath: path.resolve,
   };
+}
+
+async function inspectFuseFile(chromePath, Adapters) {
+  try {
+    await Adapters.access(chromePath);
+    const chunks = [];
+    for await (const chunk of Adapters.createReadStream(chromePath, { highWaterMark: 4 * 1024 * 1024 })) chunks.push(chunk);
+    return inspectFuseWire(Buffer.concat(chunks));
+  } catch {
+    return { classification: "Unknown", reason: "chrome.dll-unreadable" };
+  }
 }
 
 export async function inspectPackage(asarPath, nativeDirectory, Adapters = createProductionAdapters()) {
@@ -41,6 +74,8 @@ export async function inspectPackage(asarPath, nativeDirectory, Adapters = creat
   }
 
   const nativeModulePresent = await containsNativeDeviceKeyModule(nativeDirectory, Adapters);
+  const chromePath = path.join(path.dirname(asarPath), "chrome.dll");
+  const electronFuses = await inspectFuseFile(chromePath, Adapters);
   const allSignatures = Object.values(signatureState).every(Boolean);
   const classification = allSignatures
     ? "CandidateCompatible"
@@ -52,6 +87,7 @@ export async function inspectPackage(asarPath, nativeDirectory, Adapters = creat
     nativeModulePresent,
     schemaVersion: 1,
     signatures: signatureState,
+    electronFuses,
   };
 }
 

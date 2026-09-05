@@ -55,6 +55,15 @@ kill or take over the existing process.
 
 Do not infer broad Windows or Codex-version compatibility from these results.
 
+### Compatibility notes
+
+Codex Desktop `26.901.2854.0` has been reported incompatible because its Electron
+main-process inspector is disabled, even though the renderer CDP endpoint opens.
+The launcher requires both endpoints for the current main-process bootstrap and
+will fail closed when that incompatibility is detected. This does not establish
+that every later Codex version is incompatible; future builds may change the
+behavior.
+
 ## Usage
 
 Normal setup:
@@ -160,6 +169,10 @@ succeeds while direct `Process.Start` fails, this is the cause.
 Inspect the logs for `SpecialLaunch`, `SpecialLaunchConfirmed`, `Orchestrator`,
 and `Active`. Also confirm that the package check succeeded. Do not take
 ownership of WindowsApps or change its ACLs.
+
+If the renderer debug endpoint opens but the main-process inspector does not,
+the current Codex build may have disabled Electron's `--inspect` support. The
+launcher reports this separately from a general debug-port failure.
 
 ## Logging
 

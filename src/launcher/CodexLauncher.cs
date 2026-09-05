@@ -22,15 +22,24 @@ internal sealed class CodexLauncher
         uint pid = AppxActivation.Activate(appUserModelId, arguments);
         return Process.GetProcessById((int)pid);
     }
-    internal bool PortsOpen(int rendererPort, int mainPort, int timeoutMs)
+    internal bool PortsOpen(int rendererPort, int mainPort, int timeoutMs, out bool rendererReady, out bool mainReady)
     {
+        rendererReady = false; mainReady = false;
         DateTime deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
         while (DateTime.UtcNow < deadline)
         {
-            if (CanConnect(rendererPort) && CanConnect(mainPort)) return true;
+            rendererReady = CanConnect(rendererPort); mainReady = CanConnect(mainPort);
+            if (rendererReady && mainReady) return true;
             System.Threading.Thread.Sleep(100);
         }
+        rendererReady = CanConnect(rendererPort); mainReady = CanConnect(mainPort);
         return false;
+    }
+    internal static string DescribePortFailure(bool rendererReady, bool mainReady)
+    {
+        if (rendererReady && !mainReady) return "Renderer debug endpoint opened, but the Codex main-process inspector did not. This Codex version may disable the Electron main inspector required by the launcher.";
+        if (!rendererReady && mainReady) return "Codex main-process inspector opened, but the renderer debug endpoint did not.";
+        return "Neither Codex debug endpoint opened.";
     }
     private bool CanConnect(int port)
     {
