@@ -74,6 +74,7 @@ behavior.
 | 26.901.41123 | 5 Sept 2026 | 26.901.5003.0 | v0.2.0 | Incompatible / tested |
 | 26.901.41123 | 5 Sept 2026 | 26.901.5003.0 | v0.3.0 | Supported / tested |
 | 26.901.41600 | 5 Sept 2026 | 26.901.5280.0 | v0.3.0 | Supported / tested |
+| 26.901.51231 | 6 Sept 2026 | 26.901.6511.0 | v0.3.0 | Supported / tested |
 
 The version shown in Codex About may differ from the Windows Store/MSIX package
 version. This project records both when known. Compatibility is based on tested
