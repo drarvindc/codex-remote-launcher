@@ -117,6 +117,28 @@ finds zero or multiple candidates, it refuses to guess and explains the issue
 in the logs. Manual JSON configuration is only a fallback for unusual or
 ambiguous installations.
 
+## Diagnostic tool
+
+If Remote is missing or the launcher does not appear to be working, use the
+included diagnostic tool before opening or updating a GitHub issue.
+
+1. Open the `tools` folder.
+2. Double-click `run-issue-diagnostics.cmd`.
+3. Wait for the diagnostic to finish.
+4. Open `tools\codex-remote-diagnostics.txt`.
+5. Read the Troubleshooting Summary first.
+6. If the suggested steps do not resolve the problem, paste or attach the
+   report in the GitHub issue.
+
+The diagnostic is read-only and is designed to be safe to share publicly. It
+does not collect passwords, authentication tokens, cookies, device keys,
+authentication databases, project contents, or chat contents. User-profile
+paths are sanitized.
+
+The report distinguishes Codex not running, a normal Codex launch, a Codex
+Remote Launcher special launch, and the latest bridge/Active state when
+available.
+
 ## Architecture
 
 The current launcher-only path is:
@@ -151,18 +173,10 @@ The current design intentionally has none of the following:
 
 ## Troubleshooting
 
-Having trouble with Remote?
-
-1. Open the `tools` folder.
-2. Double-click `run-issue-diagnostics.cmd`.
-3. Wait for the diagnostic to finish.
-4. Open `tools\codex-remote-diagnostics.txt`.
-5. Paste the report into the GitHub issue.
-
-If Windows prevents the diagnostic from running, the diagnostic window will
-stay open and show the error; copy that message into the issue.
-
-Advanced users may run `tools\issue-diagnostics.ps1` directly.
+For detailed launcher errors, use the Diagnostic tool above. If Windows
+prevents it from running, the diagnostic window will stay open and show the
+error; copy that message into the issue. Advanced users may run
+`tools\issue-diagnostics.ps1` directly.
 
 ### Launcher says Codex is already running
 
