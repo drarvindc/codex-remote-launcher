@@ -151,6 +151,19 @@ The current design intentionally has none of the following:
 
 ## Troubleshooting
 
+Having trouble with Remote?
+
+1. Open the `tools` folder.
+2. Double-click `run-issue-diagnostics.cmd`.
+3. Wait for the diagnostic to finish.
+4. Open `tools\codex-remote-diagnostics.txt`.
+5. Paste the report into the GitHub issue.
+
+If Windows prevents the diagnostic from running, the diagnostic window will
+stay open and show the error; copy that message into the issue.
+
+Advanced users may run `tools\issue-diagnostics.ps1` directly.
+
 ### Launcher says Codex is already running
 
 Close Codex fully, then run the launcher again. The launcher intentionally does
