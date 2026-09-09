@@ -59,10 +59,10 @@ Do not infer broad Windows or Codex-version compatibility from these results.
 
 Codex Desktop `26.901.2854.0` has been reported incompatible because its Electron
 main-process inspector is disabled, even though the renderer CDP endpoint opens.
-The launcher requires both endpoints for the current main-process bootstrap and
-will fail closed when that incompatibility is detected. This does not establish
-that every later Codex version is incompatible; future builds may change the
-behavior.
+The older v0.2.0 bootstrap required both endpoints and will fail closed in that
+condition. v0.3.0 adds a RendererOnly bootstrap when the renderer bridge can
+prove activation. This does not establish that every later Codex version is
+incompatible; future builds may change the behavior.
 
 ### Compatibility matrix
 
@@ -75,10 +75,36 @@ behavior.
 | 26.901.41123 | 5 Sept 2026 | 26.901.5003.0 | v0.3.0 | Supported / tested |
 | 26.901.41600 | 5 Sept 2026 | 26.901.5280.0 | v0.3.0 | Supported / tested |
 | 26.901.51231 | 6 Sept 2026 | 26.901.6511.0 | v0.3.0 | Supported / tested |
+| 26.903.61454 | 9 Sept 2026 | 26.903.8094.0 | v0.3.0 | Supported / tested |
 
 The version shown in Codex About may differ from the Windows Store/MSIX package
 version. This project records both when known. Compatibility is based on tested
 combinations, not assumed version ranges.
+
+### Why the latest builds are interesting
+
+Codex Desktop `26.901.x` changed the internal Electron behavior used by this
+launcher: the main-process inspector was no longer available, so the older
+v0.2.0 bootstrap path failed. v0.3.0 added a second RendererOnly bootstrap
+path that can activate Remote when the renderer bridge is available and can
+prove success.
+
+On `26.903.61454`, released 9 Sept 2026 (`26.903.8094.0` MSIX/package), the
+main-process inspector became available again. The same v0.3.0 launcher
+therefore used the original full bootstrap path automatically and completed
+successfully with `bridgeProof=True` and `Active`. No launcher update was
+required.
+
+In practice, v0.3.0 supports both tested conditions: it uses the full
+MainInspector path when that endpoint is available, and falls back to
+RendererOnly when it is not. This still depends on undocumented Codex Desktop
+internals, so each new build is tested separately rather than assuming broad
+version-range compatibility.
+
+During testing of `26.903.61454`, the Remote section disappeared until the
+target computer was reauthorized/reconnected. After reconnecting, the Remote
+section and the previous remote project/job returned. This is an observed
+update behavior, not a confirmed universal Codex requirement.
 
 Issue #3 originally reported MSIX `26.901.2854.0` with the same main-process
 inspector failure. This does not establish that every 26.901 build is
